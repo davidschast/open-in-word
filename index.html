@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Open in Word</title>
+<style>
+  :root { --paper: #f2f3f6; --ink: #171b29; --ink-2: #545b70; --accent: #2f43a3; color-scheme: light; }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #0e111c; --ink: #e8eaf2; --ink-2: #a5abc0; --accent: #9aa9ff; color-scheme: dark; }
+  }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font: 17px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif;
+    display: grid; place-items: center; padding: 24px; box-sizing: border-box;
+  }
+  main { max-width: 26rem; display: grid; gap: 14px; text-align: center; }
+  h1 { font: 600 24px/1.2 Georgia, serif; margin: 0; overflow-wrap: anywhere; }
+  p { margin: 0; color: var(--ink-2); }
+  a.btn {
+    justify-self: center; display: inline-block; text-decoration: none;
+    background: var(--accent); color: var(--paper); font-weight: 700;
+    border-radius: 999px; padding: 12px 24px;
+  }
+  [hidden] { display: none !important; }
+  a.btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="name">Opening in Word…</h1>
+  <p id="msg">If Word doesn't open by itself, tap the button.</p>
+  <a class="btn" id="go" href="#" hidden>Open in Word</a>
+  <p id="after" hidden>You can close this page once Word has the document.</p>
+</main>
+<script>
+// Relay for the PoetryDB Submissions app. The app can't hand an ms-word: link to Word from
+// inside the Claude app, but it can open an ordinary web page; this page then passes the link on.
+// The link travels in the #fragment, which browsers never send to the server.
+// Only Office "open document" links to OneDrive files are accepted, so this can't be used
+// to send anyone anywhere else.
+(function () {
+  var raw = "";
+  try { raw = decodeURIComponent(location.hash.slice(1)); } catch (e) { raw = ""; }
+  var ok = /^ms-(word|excel|powerpoint):(ofe|ofv)\|u\|https:\/\/d\.docs\.live\.net\/[0-9a-f]+\/[^|]+$/i.test(raw);
+  var name = document.getElementById("name");
+  var msg = document.getElementById("msg");
+  if (!ok) {
+    name.textContent = "Nothing to open";
+    msg.textContent = "This page opens poems from the PoetryDB Submissions app. Use its Open in Word button.";
+    return;
+  }
+  var file = raw.split("/").pop();
+  try { file = decodeURIComponent(file); } catch (e) { /* keep encoded */ }
+  name.textContent = file.replace(/\.(docx?|xlsx?|pptx?)$/i, "");
+  var go = document.getElementById("go");
+  go.href = raw;
+  go.hidden = false;
+  document.getElementById("after").hidden = false;
+  // Try straight away; iPhone may ask "Open in Word?" first.
+  setTimeout(function () { location.href = raw; }, 50);
+})();
+</script>
+</body>
+</html>
